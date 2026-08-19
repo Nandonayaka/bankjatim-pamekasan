@@ -1,9 +1,42 @@
-@import 'tailwindcss';
-
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
+@import "tailwindcss";
 
 @theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+    --font-sans: 'Poppins', system-ui, sans-serif;
+    --color-brand-red: #C8102E;
+    --color-brand-red-dark: #a30a25;
+    --color-brand-gold: #e59b12;
+    --color-brand-gold-dark: #cca028;
+}
+
+body {
+    font-family: 'Poppins', system-ui, sans-serif;
+}
+
+/* Table data cell global formatting: color #4B5563, font medium, 14px */
+table tbody td {
+    color: #4B5563;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+/* Modal overlay transitions */
+.modal-overlay {
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.22s ease;
+}
+
+.modal-overlay.open {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.modal-overlay .modal-card {
+    transform: scale(0.95) translateY(12px);
+    transition: transform 0.22s ease;
+}
+
+.modal-overlay.open .modal-card {
+    transform: scale(1) translateY(0);
 }
