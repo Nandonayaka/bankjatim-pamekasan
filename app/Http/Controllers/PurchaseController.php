@@ -71,8 +71,7 @@ class PurchaseController extends Controller
             ]);
 
             // Update inventory
-            $period = Carbon::parse($validated['transaction_date'])->format('Y-m');
-            $inv    = Inventory::getOrCreateForPeriod($item->id, $period);
+            $inv = Inventory::getOrCreateForDate($item->id, $validated['transaction_date']);
             $inv->total_in += $validated['quantity'];
             $inv->recalculate();
         });
@@ -86,10 +85,15 @@ class PurchaseController extends Controller
         $purchase = Purchase::findOrFail($id);
 
         DB::transaction(function () use ($purchase) {
-            $period = $purchase->transaction_date->format('Y-m');
-            $inv    = Inventory::where('item_id', $purchase->item_id)
-                ->where('period', $period)
+            $inv = Inventory::where('item_id', $purchase->item_id)
+                ->where('stock_date', $purchase->transaction_date->toDateString())
                 ->first();
+
+            if (!$inv) {
+                $inv = Inventory::where('item_id', $purchase->item_id)
+                    ->where('period', $purchase->transaction_date->format('Y-m'))
+                    ->first();
+            }
 
             if ($inv) {
                 $inv->total_in = max(0, $inv->total_in - $purchase->quantity);

@@ -151,9 +151,12 @@
 
             <div class="mb-6">
                 <label class="block text-xs font-bold text-slate-700 mb-1.5" for="total_amount">Nominal</label>
-                <input type="number" name="total_amount" id="total_amount"
-                       class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 outline-none focus:border-[#C8102E] placeholder:text-slate-400"
-                       min="0" step="0.01" placeholder="RP .000" required>
+                <div class="relative">
+                    <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400 font-semibold pointer-events-none">RP</span>
+                    <input type="number" name="total_amount" id="total_amount"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl pl-10 pr-3.5 py-2.5 text-xs text-slate-800 outline-none focus:border-[#C8102E] placeholder:text-slate-400"
+                           min="0" step="0.01" placeholder="0" required>
+                </div>
             </div>
 
             <div class="flex justify-end">

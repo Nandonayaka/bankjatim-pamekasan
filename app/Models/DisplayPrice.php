@@ -6,26 +6,19 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class Sale extends Model
+class DisplayPrice extends Model
 {
     use HasUuids;
 
     protected $fillable = [
         'item_id',
-        'customer_name',
-        'transaction_date',
-        'quantity',
         'harga_asli',
-        'unit_price',
-        'total_amount',
+        'harga_siap_jual',
     ];
 
     protected $casts = [
-        'transaction_date' => 'date',
-        'quantity'         => 'integer',
-        'harga_asli'       => 'decimal:2',
-        'unit_price'       => 'decimal:2',
-        'total_amount'     => 'decimal:2',
+        'harga_asli'      => 'decimal:2',
+        'harga_siap_jual' => 'decimal:2',
     ];
 
     public function item(): BelongsTo

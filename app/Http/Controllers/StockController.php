@@ -17,7 +17,8 @@ class StockController extends Controller
 
         $query = Inventory::with('item')
             ->where('period', $month)
-            ->orderBy('created_at');
+            ->orderByDesc('stock_date')
+            ->orderByDesc('created_at');
 
         if ($search) {
             $query->whereHas('item', fn($q) => $q->where('item_name', 'like', "%{$search}%"));
@@ -34,12 +35,15 @@ class StockController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'period'        => 'required|string|regex:/^\d{4}-\d{2}$/',
+            'stock_date'    => 'required|date',
             'item_name'     => 'required|string|max:255',
             'initial_stock' => 'required|integer|min:0',
         ]);
 
-        DB::transaction(function () use ($validated) {
+        $dateStr = Carbon::parse($validated['stock_date'])->toDateString();
+        $period  = Carbon::parse($dateStr)->format('Y-m');
+
+        DB::transaction(function () use ($validated, $dateStr) {
             // Find existing item by name or create new one
             $item = Item::whereRaw('LOWER(item_name) = ?', [strtolower(trim($validated['item_name']))])->first();
             if (!$item) {
@@ -49,14 +53,14 @@ class StockController extends Controller
                 ]);
             }
 
-            // Get or create inventory for item & period
-            $inv = Inventory::getOrCreateForPeriod($item->id, $validated['period']);
+            // Get or create inventory for item & date
+            $inv = Inventory::getOrCreateForDate($item->id, $dateStr);
             $inv->initial_stock = (int) $validated['initial_stock'];
             $inv->recalculate();
         });
 
-        return redirect()->route('stock.index', ['month' => $validated['period']])
-            ->with('success', 'Data sisa barang (stok lama) berhasil disimpan.');
+        return redirect()->route('stock.index', ['month' => $period])
+            ->with('success', 'Data persediaan stok berhasil disimpan.');
     }
 
     public function update(Request $request, string $id)

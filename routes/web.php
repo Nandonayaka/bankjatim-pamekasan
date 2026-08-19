@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\DebitController;
+use App\Http\Controllers\DisplayPriceController;
 use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\SaleController;
 use App\Http\Controllers\StockController;
@@ -25,13 +26,15 @@ Route::middleware('auth')->group(function () {
     Route::post('/purchases', [PurchaseController::class, 'store'])->name('purchases.store');
     Route::delete('/purchases/{id}', [PurchaseController::class, 'destroy'])->name('purchases.destroy');
 
-    // Sales (Penjualan)
-    Route::get('/sales', [SaleController::class, 'index'])->name('sales.index');
-    Route::post('/sales', [SaleController::class, 'store'])->name('sales.store');
-    Route::delete('/sales/{id}', [SaleController::class, 'destroy'])->name('sales.destroy');
+    // Selling Price (Display harga — tidak memengaruhi stok/penjualan)
+    Route::get('/sales', [DisplayPriceController::class, 'index'])->name('sales.index');
+    Route::post('/sales', [DisplayPriceController::class, 'store'])->name('sales.store');
+    Route::delete('/sales/{id}', [DisplayPriceController::class, 'destroy'])->name('sales.destroy');
 
-    // Debit (Keuntungan / Margin)
+    // Debit (Kasir — mencatat transaksi jual nyata, kurangi stok)
     Route::get('/debit', [DebitController::class, 'index'])->name('debit.index');
+    Route::post('/debit', [SaleController::class, 'store'])->name('debit.store');
+    Route::delete('/debit/{id}', [SaleController::class, 'destroy'])->name('debit.destroy');
 
     // Stock (Stok Barang)
     Route::get('/stock', [StockController::class, 'index'])->name('stock.index');

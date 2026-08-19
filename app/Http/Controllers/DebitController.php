@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Inventory;
+use App\Models\Item;
+use App\Models\Purchase;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -38,12 +41,23 @@ class DebitController extends Controller
                 s.id,
                 s.transaction_date,
                 i.item_name,
+                s.customer_name,
                 s.quantity,
-                (COALESCE(p_avg.avg_unit_price, 0) * s.quantity) AS harga_kulaan,
+                COALESCE(NULLIF(dp_latest.harga_asli, 0), p_avg.avg_unit_price, 0) AS harga_satuan,
+                (COALESCE(NULLIF(dp_latest.harga_asli, 0), p_avg.avg_unit_price, 0) * s.quantity) AS modal,
                 s.total_amount AS harga_jual,
-                (s.total_amount - (COALESCE(p_avg.avg_unit_price, 0) * s.quantity)) AS laba
+                (s.total_amount - (COALESCE(NULLIF(dp_latest.harga_asli, 0), p_avg.avg_unit_price, 0) * s.quantity)) AS laba
             FROM sales s
             JOIN items i ON s.item_id = i.id
+            LEFT JOIN (
+                SELECT dp1.item_id, dp1.harga_asli
+                FROM display_prices dp1
+                INNER JOIN (
+                    SELECT item_id, MAX(created_at) AS max_created
+                    FROM display_prices
+                    GROUP BY item_id
+                ) dp_max ON dp1.item_id = dp_max.item_id AND dp1.created_at = dp_max.max_created
+            ) dp_latest ON s.item_id = dp_latest.item_id
             LEFT JOIN (
                 SELECT item_id, AVG(unit_price) AS avg_unit_price
                 FROM purchases
@@ -52,6 +66,7 @@ class DebitController extends Controller
             {$where}
             ORDER BY s.transaction_date DESC
         ";
+
 
         // Total laba
         $totalLaba = DB::selectOne(
@@ -80,7 +95,26 @@ class DebitController extends Controller
 
         $monthOptions = $this->monthOptions();
 
-        return view('debit.index', compact('records', 'totalLaba', 'search', 'month', 'monthOptions'));
+        // Items untuk form kasir
+        $currentPeriod = Carbon::now()->format('Y-m');
+        $avgPrices = Purchase::selectRaw('item_id, AVG(unit_price) as avg_price')
+            ->groupBy('item_id')
+            ->pluck('avg_price', 'item_id')
+            ->toArray();
+
+        $items = Item::where(function($q) {
+            $q->has('purchases')->orHas('inventory');
+        })->orderBy('item_name')->get()->map(function ($item) use ($currentPeriod, $avgPrices) {
+            $inv = Inventory::where('item_id', $item->id)->where('period', $currentPeriod)->first();
+            if (!$inv) {
+                $inv = Inventory::where('item_id', $item->id)->orderByDesc('period')->first();
+            }
+            $item->current_stock      = $inv ? $inv->final_stock : 0;
+            $item->avg_purchase_price = $avgPrices[$item->id] ?? 0;
+            return $item;
+        });
+
+        return view('debit.index', compact('records', 'totalLaba', 'search', 'month', 'monthOptions', 'items'));
     }
 
     private function monthOptions(): array

@@ -53,7 +53,7 @@
                         $stokAkhir = $inv->final_stock;
                     @endphp
                     <tr class="hover:bg-slate-50/80 transition-colors h-[52px]">
-                        <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">1 / {{ \Carbon\Carbon::createFromFormat('Y-m', $inv->period)->format('m / y') }}</td>
+                        <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ $inv->stock_date ? \Carbon\Carbon::parse($inv->stock_date)->format('j / m / y') : \Carbon\Carbon::createFromFormat('Y-m', $inv->period)->format('1 / m / y') }}</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ strtolower($inv->item?->item_name ?? '-') }}</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ number_format($inv->initial_stock, 0, ',', '.') }} PCS</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ number_format($inv->total_in, 0, ',', '.') }} pcs</td>
@@ -136,16 +136,12 @@
 
         <form method="POST" action="{{ route('stock.store') }}" id="stock-create-form">
             @csrf
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mb-6">
                 <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="period">Tanggal</label>
-                    <select name="period" id="period" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 outline-none focus:border-[#C8102E]" required>
-                        @foreach($monthOptions as $opt)
-                            <option value="{{ $opt['value'] }}" {{ $month === $opt['value'] ? 'selected' : '' }}>
-                                {{ $opt['label'] }}
-                            </option>
-                        @endforeach
-                    </select>
+                    <label class="block text-xs font-bold text-slate-700 mb-1.5" for="stock_date">Tanggal</label>
+                    <input type="date" name="stock_date" id="stock_date"
+                           class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 outline-none focus:border-[#C8102E]"
+                           value="{{ date('Y-m-d') }}" required>
                 </div>
                 <div>
                     <label class="block text-xs font-bold text-slate-700 mb-1.5" for="item_name">Nama barang</label>
@@ -165,11 +161,6 @@
                            class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 text-xs text-slate-800 outline-none focus:border-[#C8102E] placeholder:text-slate-400"
                            min="0" placeholder="0" required>
                 </div>
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-xs font-bold text-slate-700 mb-1.5">Nominal</label>
-                <input type="text" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-400" placeholder="RP .000" disabled>
             </div>
 
             <div class="flex justify-end">
