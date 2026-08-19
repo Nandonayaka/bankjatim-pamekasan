@@ -49,7 +49,7 @@
                     <tr class="hover:bg-slate-50/80 transition-colors h-[52px]">
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ \Carbon\Carbon::parse($r->transaction_date)->format('j / m / y') }}</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ strtolower($r->item_name) }}</td>
-                        <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ number_format($r->quantity, 0, ',', '.') }} Lembar</td>
+                        <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">{{ number_format($r->quantity, 0, ',', '.') }} PCS</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">RP . {{ number_format($r->harga_kulaan, 0, ',', '.') }}</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">RP . {{ number_format($r->harga_jual, 0, ',', '.') }}</td>
                         <td class="py-3 px-3 sm:px-4 text-[14px] font-medium text-[#4B5563] border-b border-slate-200 align-middle">
